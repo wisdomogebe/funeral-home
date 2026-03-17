@@ -4,12 +4,15 @@ services:
     runtime: python
     pythonVersion: 3.11
     buildCommand: pip install -r requirements.txt && python manage.py collectstatic --no-input && python manage.py migrate
-    startCommand: gunicorn memorial_care.wsgi:application --bind 0.0.0.0:$PORT --timeout 30
+    startCommand: exec gunicorn memorial_care.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 30
     envVars:
       - key: DEBUG
         value: "False"
       - key: ALLOWED_HOSTS
         value: "*.render.com"
+        scope: runtime_only
+      - key: PYTHONUNBUFFERED
+        value: "1"
         scope: runtime_only
       - key: DATABASE_URL
         fromDatabase:

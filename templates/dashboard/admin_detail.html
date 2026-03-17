@@ -1,0 +1,74 @@
+{% extends "base/base.html" %}
+
+{% block title %}Admin Dashboard Details - MemorialCare{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="page-title mb-4">
+        <i class="bi bi-speedometer"></i> System Overview
+    </h1>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">System Statistics</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-2"><strong>Total Users:</strong> {{ total_users }}</p>
+                <p class="mb-2"><strong>Total Cases:</strong> {{ total_cases }}</p>
+                <p class="mb-2"><strong>Total Revenue:</strong> ₦{{ total_revenue }}</p>
+                <p class="mb-2"><strong>Pending Cases:</strong> {{ pending_cases }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Inventory Status</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-2"><strong>Total Items:</strong> {{ total_items }}</p>
+                <p class="mb-2"><strong>Low Stock Items:</strong> <span class="badge bg-warning">{{ low_stock_count }}</span></p>
+                <p class="mb-2"><strong>Out of Stock:</strong> <span class="badge bg-danger">{{ out_of_stock_count }}</span></p>
+                <p class="mb-2"><strong>Stock Value:</strong> ₦{{ total_inventory_value }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Recent Activities</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Action</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for activity in recent_activities %}
+                                <tr>
+                                    <td>{{ activity.user.get_full_name }}</td>
+                                    <td>{{ activity.description }}</td>
+                                    <td>{{ activity.timestamp|date:"M d, Y H:i" }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr><td colspan="3" class="text-center text-muted">No recent activities</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

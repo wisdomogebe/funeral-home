@@ -1,0 +1,114 @@
+{% extends "base/base.html" %}
+
+{% block title %}Invoices - MemorialCare{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="page-title mb-4">
+        <i class="bi bi-receipt"></i> Invoices
+    </h1>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Search & Filter</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <input type="text" name="search" class="form-control" placeholder="Search..." value="{{ search }}">
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="">All Statuses</option>
+                    <option value="draft" {% if status == 'draft' %}selected{% endif %}>Draft</option>
+                    <option value="issued" {% if status == 'issued' %}selected{% endif %}>Issued</option>
+                    <option value="paid" {% if status == 'paid' %}selected{% endif %}>Paid</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
+            <div class="col-md-3">
+                {% if user.role != 'family_client' %}
+                    <a href="{% url 'fhms:invoice_create' %}" class="btn btn-success w-100">
+                        <i class="bi bi-plus-circle"></i> Create Invoice
+                    </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Invoices Table -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Invoice List</h5>
+    </div>
+    <div class="card-body">
+        {% if invoices %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Invoice #</th>
+                            <th>Case</th>
+                            <th>Issued Date</th>
+                            <th>Due Date</th>
+                            <th class="text-end">Total</th>
+                            <th class="text-end">Paid</th>
+                            <th class="text-end">Balance</th>
+                            <th>Status</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for invoice in invoices %}
+                            <tr>
+                                <td><code>{{ invoice.invoice_number }}</code></td>
+                                <td>{{ invoice.case.case_number }}</td>
+                                <td>{{ invoice.issued_at|date:"M d, Y"|default:"Pending" }}</td>
+                                <td>{{ invoice.due_date|date:"M d, Y" }}</td>
+                                <td class="text-end">₦{{ invoice.total_amount }}</td>
+                                <td class="text-end">₦{{ invoice.amount_paid }}</td>
+                                <td class="text-end"><strong>₦{{ invoice.balance_due }}</strong></td>
+                                <td>
+                                    <span class="badge {% if invoice.status == 'draft' %}bg-secondary{% elif invoice.status == 'issued' %}bg-info{% elif invoice.status == 'paid' %}bg-success{% else %}bg-warning{% endif %}">
+                                        {{ invoice.get_status_display }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <a href="{% url 'fhms:invoice_detail' invoice.id %}" class="btn btn-sm btn-info">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if invoices.has_other_pages %}
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center mt-4">
+                        {% if invoices.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">First</a>
+                            </li>
+                        {% endif %}
+                        <li class="page-item active"><span class="page-link">Page {{ invoices.number }} of {{ invoices.paginator.num_pages }}</span></li>
+                        {% if invoices.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ invoices.paginator.num_pages }}">Last</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+        {% else %}
+            <div class="alert alert-info">No invoices found.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

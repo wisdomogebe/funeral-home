@@ -1,0 +1,92 @@
+{% extends "base/base.html" %}
+
+{% block title %}Case Analysis Report - MemorialCare{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="page-title mb-4">
+        <i class="bi bi-pie-chart"></i> Case Analysis Report
+    </h1>
+</div>
+
+<!-- Summary -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="text-muted">Total Cases</h6>
+                <p class="fs-4">{{ total_cases }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="text-muted">Completion Rate</h6>
+                <p class="fs-4">{{ completion_rate }}%</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="text-muted">Avg. Processing Time</h6>
+                <p class="fs-4">{{ avg_processing_days }} days</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Status Distribution -->
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Status Distribution</h5>
+            </div>
+            <div class="card-body">
+                {% if status_breakdown %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Completed</span>
+                            <span>{{ status_breakdown.completed }}</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" style="width: {{ status_breakdown.completed_pct }}%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>In Progress</span>
+                            <span>{{ status_breakdown.in_progress }}</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-info" style="width: {{ status_breakdown.in_progress_pct }}%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Pending</span>
+                            <span>{{ status_breakdown.pending }}</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-warning" style="width: {{ status_breakdown.pending_pct }}%"></div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Monthly Trend</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted text-center">Chart data will be displayed here</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

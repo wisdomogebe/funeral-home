@@ -1,0 +1,223 @@
+{% extends "base/base.html" %}
+
+{% block title %}Inventory Item Details - MemorialCare{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="page-title mb-0">
+            <i class="bi bi-box-seam"></i> {{ item.name }}
+        </h1>
+        <div>
+            <a href="{% url 'fhms:inventory_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Main Details -->
+    <div class="col-lg-8">
+        <!-- Item Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Item Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Item Code</h6>
+                        <p><code class="bg-light p-2 rounded">{{ item.item_code }}</code></p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Category</h6>
+                        <p>{{ item.get_category_display }}</p>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Supplier</h6>
+                        <p>{{ item.supplier|default:"Not specified" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Status</h6>
+                        <p>
+                            {% if item.is_active %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                {% if item.description %}
+                    <div class="mb-3">
+                        <h6 class="text-muted">Description</h6>
+                        <p>{{ item.description }}</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Stock Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Stock Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <h6 class="text-muted">Current Stock Level</h6>
+                        <p class="fs-5">
+                            <strong>{{ item.quantity_in_stock }} units</strong>
+                            {% if item.quantity_in_stock == 0 %}
+                                <span class="badge bg-danger">Out of Stock</span>
+                            {% elif item.quantity_in_stock <= item.reorder_level %}
+                                <span class="badge bg-warning">Low Stock</span>
+                            {% else %}
+                                <span class="badge bg-success">Adequate</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <h6 class="text-muted">Reorder Level</h6>
+                        <p class="fs-5"><strong>{{ item.reorder_level }} units</strong></p>
+                    </div>
+                </div>
+                <div class="progress" style="height: 25px;">
+                    {% with total=item.reorder_level|add:item.quantity_in_stock %}
+                    <div class="progress-bar {% if item.quantity_in_stock == 0 %}bg-danger{% elif item.quantity_in_stock <= item.reorder_level %}bg-warning{% else %}bg-success{% endif %}" 
+                         role="progressbar" 
+                         style="width: {% if item.quantity_in_stock == 0 %}0{% else %}{% widthratio item.quantity_in_stock total 100 %}{% endif %}%"
+                         aria-valuenow="{{ item.quantity_in_stock }}" 
+                         aria-valuemin="0" 
+                         aria-valuemax="{{ total }}">
+                        {{ item.quantity_in_stock }}
+                    </div>
+                    {% endwith %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Pricing Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Pricing & Value</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <h6 class="text-muted">Unit Cost</h6>
+                        <p class="fs-5"><strong>₦{{ item.unit_cost }}</strong></p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <h6 class="text-muted">Total Stock Value</h6>
+                        <p class="fs-5"><strong class="text-success">₦{{ item.stock_value }}</strong></p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <h6 class="text-muted">Reorder Cost</h6>
+                        <p class="fs-5"><strong>₦{{ reorder_cost }}</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction History -->
+        {% if transactions %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Transactions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th class="text-center">Quantity</th>
+                                    <th>Reason</th>
+                                    <th>Reference</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in transactions %}
+                                    <tr>
+                                        <td>{{ transaction.created_at|date:"M d, Y H:i" }}</td>
+                                        <td>
+                                            <span class="badge {% if transaction.type == 'in' %}bg-success{% else %}bg-warning{% endif %}">
+                                                {{ transaction.get_type_display }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">{{ transaction.quantity }}</td>
+                                        <td>{{ transaction.reason|default:"Manual adjustment" }}</td>
+                                        <td><small>{{ transaction.reference_number|default:"-" }}</small></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Side Actions -->
+    <div class="col-lg-4">
+        <!-- Quick Stats -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0">Status</h5>
+            </div>
+            <div class="card-body text-center">
+                {% if item.quantity_in_stock == 0 %}
+                    <h2 class="text-danger mb-2"><i class="bi bi-exclamation-triangle"></i></h2>
+                    <p class="text-danger"><strong>Out of Stock</strong></p>
+                    <p class="small text-muted">This item needs to be reordered immediately.</p>
+                {% elif item.quantity_in_stock <= item.reorder_level %}
+                    <h2 class="text-warning mb-2"><i class="bi bi-exclamation-circle"></i></h2>
+                    <p class="text-warning"><strong>Low Stock</strong></p>
+                    <p class="small text-muted">Consider placing a reorder soon.</p>
+                {% else %}
+                    <h2 class="text-success mb-2"><i class="bi bi-check-circle"></i></h2>
+                    <p class="text-success"><strong>In Stock</strong></p>
+                    <p class="small text-muted">Stock level is adequate.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0">Actions</h5>
+            </div>
+            <div class="card-body">
+                <a href="{% url 'fhms:inventory_update' item.id %}" class="btn btn-warning w-100 mb-2">
+                    <i class="bi bi-pencil"></i> Edit Item
+                </a>
+                <a href="{% url 'fhms:inventory_adjust' item.id %}" class="btn btn-info w-100">
+                    <i class="bi bi-shuffle"></i> Adjust Stock
+                </a>
+            </div>
+        </div>
+
+        <!-- Dates -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Dates</h5>
+            </div>
+            <div class="card-body">
+                <p class="small mb-2">
+                    <strong>Created:</strong><br>
+                    {{ item.created_at|date:"M d, Y H:i" }}
+                </p>
+                <p class="small">
+                    <strong>Last Updated:</strong><br>
+                    {{ item.updated_at|date:"M d, Y H:i" }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

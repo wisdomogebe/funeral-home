@@ -1,0 +1,124 @@
+{% extends "base/base.html" %}
+
+{% block title %}Funeral Cases - MemorialCare{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="page-title mb-0">Funeral Cases</h1>
+    {% if user.is_admin or user.is_director %}
+        <a href="{% url 'fhms:case_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> New Case
+        </a>
+    {% endif %}
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-6">
+                <input type="text" name="search" class="form-control" placeholder="Search cases..." value="{{ search }}">
+            </div>
+            <div class="col-md-4">
+                <select name="status" class="form-select">
+                    <option value="">All Statuses</option>
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Cases Table -->
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Case #</th>
+                    <th>Deceased</th>
+                    <th>Family</th>
+                    <th>Director</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for case in case_list %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'fhms:case_detail' case.id %}">{{ case.case_number }}</a>
+                        </td>
+                        <td>{{ case.deceased.full_name }}</td>
+                        <td>{{ case.client_family.first_name }} {{ case.client_family.last_name }}</td>
+                        <td>
+                            {% if case.funeral_director %}
+                                {{ case.funeral_director.first_name }}
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge status-{{ case.status }}">
+                                {{ case.get_status_display }}
+                            </span>
+                        </td>
+                        <td>{{ case.scheduled_date|date:"M d, Y" }}</td>
+                        <td>
+                            <a href="{% url 'fhms:case_detail' case.id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            {% if user.is_admin or user.is_director %}
+                                <a href="{% url 'fhms:case_update' case.id %}" class="btn btn-sm btn-outline-warning">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">No cases found</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if paginator.num_pages > 1 %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if case_list.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1">First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ case_list.previous_page_number }}">Previous</a>
+                </li>
+            {% endif %}
+            
+            <li class="page-item active">
+                <span class="page-link">{{ case_list.number }} of {{ paginator.num_pages }}</span>
+            </li>
+            
+            {% if case_list.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ case_list.next_page_number }}">Next</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ paginator.num_pages }}">Last</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %}
+{% endblock %}

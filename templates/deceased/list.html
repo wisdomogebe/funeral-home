@@ -1,0 +1,115 @@
+{% extends "base/base.html" %}
+
+{% block title %}Deceased Records - MemorialCare{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="page-title mb-4">
+        <i class="bi bi-person-fill"></i> Deceased Records
+    </h1>
+</div>
+
+<!-- Filters and Actions -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Search & Actions</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3 mb-3">
+            <div class="col-md-6">
+                <input type="text" name="search" class="form-control" placeholder="Search by name or reference" value="{{ search }}">
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search"></i> Search
+                </button>
+            </div>
+            <div class="col-md-3">
+                <a href="{% url 'fhms:deceased_list' %}" class="btn btn-outline-secondary w-100">Reset</a>
+            </div>
+        </form>
+        <a href="{% url 'fhms:deceased_create' %}" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i> Add Deceased Record
+        </a>
+    </div>
+</div>
+
+<!-- Deceased Records Table -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Records</h5>
+    </div>
+    <div class="card-body">
+        {% if deceased_list %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Full Name</th>
+                            <th>Date of Death</th>
+                            <th>Age</th>
+                            <th>Gender</th>
+                            <th>Status</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for deceased in deceased_list %}
+                            <tr>
+                                <td><strong>{{ deceased.full_name }}</strong></td>
+                                <td>{{ deceased.date_of_death|date:"M d, Y" }}</td>
+                                <td>{{ deceased.age|default:"-" }}</td>
+                                <td>{{ deceased.get_gender_display|default:"-" }}</td>
+                                <td>
+                                    <span class="badge bg-info">Recorded</span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="{% url 'fhms:deceased_detail' deceased.id %}" class="btn btn-info" title="View">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{% url 'fhms:deceased_update' deceased.id %}" class="btn btn-warning" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if deceased_list.has_other_pages %}
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center mt-4">
+                        {% if deceased_list.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}">First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ deceased_list.previous_page_number }}{% if search %}&search={{ search }}{% endif %}">Previous</a>
+                            </li>
+                        {% endif %}
+                        
+                        <li class="page-item active"><span class="page-link">Page {{ deceased_list.number }} of {{ deceased_list.paginator.num_pages }}</span></li>
+                        
+                        {% if deceased_list.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ deceased_list.next_page_number }}{% if search %}&search={{ search }}{% endif %}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ deceased_list.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}">Last</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-circle"></i> No deceased records found. <a href="{% url 'fhms:deceased_create' %}" class="alert-link">Create one now</a>.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,211 @@
+{% extends "base/base.html" %}
+
+{% block title %}Adjust Stock - MemorialCare{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="page-title mb-4">
+        <i class="bi bi-shuffle"></i> Adjust Stock - {{ item.name }}
+    </h1>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Current Stock Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <h6 class="text-muted">Item Code</h6>
+                        <p><code>{{ item.item_code }}</code></p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted">Current Stock</h6>
+                        <p class="fs-4"><strong>{{ item.quantity_in_stock }} units</strong></p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted">Reorder Level</h6>
+                        <p class="fs-4"><strong>{{ item.reorder_level }} units</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Adjustment Form</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="mb-4">
+                        <label class="form-label mb-3">Adjustment Type *</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" id="adjustmentTypeAdd" name="adjustment_type" value="add" required onchange="updateAdjustmentType()">
+                                    <label class="form-check-label" for="adjustmentTypeAdd">
+                                        <strong>Add Stock</strong>
+                                        <small class="text-muted d-block">Increase inventory when new items arrive</small>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" id="adjustmentTypeRemove" name="adjustment_type" value="remove" required onchange="updateAdjustmentType()">
+                                    <label class="form-check-label" for="adjustmentTypeRemove">
+                                        <strong>Remove Stock</strong>
+                                        <small class="text-muted d-block">Decrease inventory for items used or damaged</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        {% if form.adjustment_type.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.adjustment_type.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.quantity.id_for_label }}" class="form-label">Quantity *</label>
+                        {{ form.quantity }}
+                        {% if form.quantity.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.quantity.errors }}
+                            </div>
+                        {% endif %}
+                        <small class="text-muted">
+                            New stock level will be: <strong id="newStockLevel">{{ item.quantity_in_stock }}</strong> units
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.reason.id_for_label }}" class="form-label">Reason</label>
+                        {{ form.reason }}
+                        {% if form.reason.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.reason.errors }}
+                            </div>
+                        {% endif %}
+                        <small class="text-muted">e.g., "Stock delivery from supplier", "Items used in service", "Damaged items"</small>
+                    </div>
+
+                    <div class="alert alert-info d-none" id="summaryAlert" role="alert">
+                        <strong>Summary:</strong> <span id="summaryText"></span>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'fhms:inventory_detail' item.id %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Confirm Adjustment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Side Info -->
+    <div class="col-lg-4">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0">Item Details</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-2"><strong>Name:</strong></p>
+                <p class="text-muted mb-3">{{ item.name }}</p>
+                
+                <p class="mb-2"><strong>Category:</strong></p>
+                <p class="text-muted mb-3">{{ item.get_category_display }}</p>
+                
+                <p class="mb-2"><strong>Unit Cost:</strong></p>
+                <p class="text-muted mb-3">₦{{ item.unit_cost }}</p>
+                
+                {% if item.supplier %}
+                    <p class="mb-2"><strong>Supplier:</strong></p>
+                    <p class="text-muted">{{ item.supplier }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Reference</h5>
+            </div>
+            <div class="card-body">
+                <h6 class="mb-2">Common Reasons:</h6>
+                <ul class="small">
+                    <li>Stock delivery</li>
+                    <li>Used in service</li>
+                    <li>Damaged item</li>
+                    <li>Stock count adjustment</li>
+                    <li>Lost item</li>
+                    <li>Return to supplier</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const currentStock = {{ item.quantity_in_stock }};
+
+function updateAdjustmentType() {
+    const quantityInput = document.querySelector('[name="quantity"]');
+    const newStockLevel = document.getElementById('newStockLevel');
+    const summaryAlert = document.getElementById('summaryAlert');
+    const summaryText = document.getElementById('summaryText');
+    
+    const adjustmentType = document.querySelector('input[name="adjustment_type"]:checked')?.value;
+    const quantity = parseInt(quantityInput.value) || 0;
+    
+    if (!adjustmentType) {
+        newStockLevel.textContent = currentStock;
+        summaryAlert.classList.add('d-none');
+        return;
+    }
+    
+    let newLevel = currentStock;
+    if (adjustmentType === 'add') {
+        newLevel = currentStock + quantity;
+        summaryText.textContent = `Add ${quantity} units to ${currentStock} = ${newLevel} units`;
+    } else {
+        newLevel = Math.max(0, currentStock - quantity);
+        summaryText.textContent = `Remove ${quantity} units from ${currentStock} = ${newLevel} units`;
+    }
+    
+    newStockLevel.textContent = newLevel;
+    if (quantity > 0) {
+        summaryAlert.classList.remove('d-none');
+    } else {
+        summaryAlert.classList.add('d-none');
+    }
+}
+
+document.querySelector('input[name="quantity"]')?.addEventListener('change', updateAdjustmentType);
+document.querySelector('input[name="quantity"]')?.addEventListener('input', updateAdjustmentType);
+document.querySelectorAll('input[name="adjustment_type"]').forEach(radio => {
+    radio.addEventListener('change', updateAdjustmentType);
+});
+</script>
+
+<style>
+    .form-control, .form-select {
+        border: 1px solid #dee2e6;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    .invalid-feedback {
+        color: #dc3545;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}

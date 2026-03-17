@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: memorialcare
+    runtime: python
+    pythonVersion: 3.11
+    buildCommand: bash build.sh
+    startCommand: gunicorn memorial_care.wsgi:application --bind 0.0.0.0:$PORT
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "*.render.com"
+        scope: runtime_only
+      - key: DATABASE_URL
+        fromDatabase:
+          name: memorialcare_db
+          property: connectionString
+        scope: runtime_only
+      - key: SECRET_KEY
+        generateValue: true
+        scope: runtime_only
+
+databases:
+  - name: memorialcare_db
+    ipWhitelistEntries:
+      - service: memorialcare

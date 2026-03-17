@@ -1,0 +1,172 @@
+{% extends "base/base.html" %}
+
+{% block title %}Family Portal - MemorialCare FHMS{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="page-title mb-4">
+        <i class="bi bi-heart"></i> Welcome to MemorialCare Family Portal
+    </h1>
+    <p class="text-muted">Manage your funeral arrangements and payments in one place</p>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card">
+            <h5>My Cases</h5>
+            <div class="stat-value">{{ my_cases|length }}</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card">
+            <h5>Invoices</h5>
+            <div class="stat-value">{{ my_invoices|length }}</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card">
+            <h5>Pending Payments</h5>
+            <div class="stat-value">{{ pending_payments|length }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- My Funeral Cases -->
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">My Funeral Cases</h5>
+            </div>
+            <div class="card-body">
+                {% if my_cases %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Case #</th>
+                                    <th>Deceased</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for case in my_cases %}
+                                    <tr>
+                                        <td>
+                                            <a href="{% url 'fhms:case_detail' case.id %}">
+                                                {{ case.case_number }}
+                                            </a>
+                                        </td>
+                                        <td>{{ case.deceased.full_name }}</td>
+                                        <td>
+                                            <span class="badge status-{{ case.status }}">
+                                                {{ case.get_status_display }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No cases currently</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- My Invoices & Payments -->
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">My Invoices</h5>
+            </div>
+            <div class="card-body">
+                {% if my_invoices %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Invoice #</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for invoice in my_invoices %}
+                                    <tr>
+                                        <td>
+                                            <a href="{% url 'fhms:invoice_detail' invoice.id %}">
+                                                {{ invoice.invoice_number }}
+                                            </a>
+                                        </td>
+                                        <td>{{ invoice.total_amount }}</td>
+                                        <td>
+                                            <span class="badge status-{{ invoice.status }}">
+                                                {{ invoice.get_status_display }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No invoices</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pending Payments Alert -->
+{% if pending_payments %}
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-circle"></i>
+                <strong>Attention:</strong> You have {{ pending_payments|length }} payment(s) pending.
+                <a href="{% url 'fhms:payment_list' %}" class="alert-link">View & Pay Now</a>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Quick Links -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Links</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{% url 'fhms:case_list' %}" class="btn btn-outline-primary w-100 mb-2">
+                            <i class="bi bi-clipboard-check"></i> View Cases
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{% url 'fhms:invoice_list' %}" class="btn btn-outline-primary w-100 mb-2">
+                            <i class="bi bi-receipt"></i> View Invoices
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{% url 'fhms:payment_list' %}" class="btn btn-outline-primary w-100 mb-2">
+                            <i class="bi bi-credit-card"></i> Make Payment
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{% url 'profile' %}" class="btn btn-outline-secondary w-100 mb-2">
+                            <i class="bi bi-person"></i> My Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

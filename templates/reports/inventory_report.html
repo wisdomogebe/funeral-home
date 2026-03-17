@@ -1,0 +1,92 @@
+{% extends "base/base.html" %}
+
+{% block title %}Inventory Report - MemorialCare FHMS{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="page-title mb-4">
+        <i class="bi bi-boxes"></i> Inventory Report
+    </h1>
+</div>
+
+<!-- Summary -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="text-muted">Total Items</h6>
+                <p class="fs-4">{{ total_items }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="text-muted">Total Stock Value</h6>
+                <p class="fs-4">₦{{ total_value }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="text-muted">Low Stock Items</h6>
+                <p class="fs-4 text-warning">{{ low_stock_count }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="text-muted">Out of Stock</h6>
+                <p class="fs-4 text-danger">{{ out_of_stock_count }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Inventory Table -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Inventory Items</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Item Code</th>
+                        <th>Name</th>
+                        <th class="text-center">Quantity</th>
+                        <th class="text-end">Unit Cost</th>
+                        <th class="text-end">Total Value</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                        <tr>
+                            <td><code>{{ item.item_code }}</code></td>
+                            <td>{{ item.name }}</td>
+                            <td class="text-center">{{ item.quantity_in_stock }}</td>
+                            <td class="text-end">₦{{ item.unit_cost }}</td>
+                            <td class="text-end">₦{{ item.stock_value }}</td>
+                            <td>
+                                {% if item.quantity_in_stock == 0 %}
+                                    <span class="badge bg-danger">Out of Stock</span>
+                                {% elif item.quantity_in_stock <= item.reorder_level %}
+                                    <span class="badge bg-warning">Low Stock</span>
+                                {% else %}
+                                    <span class="badge bg-success">In Stock</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="6" class="text-center text-muted">No inventory items</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

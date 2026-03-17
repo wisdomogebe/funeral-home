@@ -1,0 +1,66 @@
+{% extends "base/base.html" %}
+
+{% block title %}MemorialCare - Home{% endblock %}
+
+{% block guest_content %}
+<div class="container py-5">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <div class="mb-4">
+                <h1 class="display-4" style="color: #2c3e50;">
+                    <i class="bi bi-heart-pulse" style="font-size: 2rem; color: #e74c3c;"></i>
+                    MemorialCare
+                </h1>
+                <h2 class="lead" style="color: #34495e;">Funeral Home Management System</h2>
+            </div>
+            
+            <p class="fs-5 mb-4">
+                We provide caring funeral services designed to celebrate life and offer comfort in times of loss. Our dedicated team is here to guide you with empathy, integrity, and respect every step of the way.
+            </p>
+            
+            <div class="d-flex gap-3">
+                <a href="{% url 'login' %}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-box-arrow-in-right"></i> Login
+                </a>
+                <a href="{% url 'register' %}" class="btn btn-outline-primary btn-lg">
+                    <i class="bi bi-person-plus"></i> Register
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card card-header bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Our Services</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success"></i>
+                            Funeral Planning & Arrangements
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success"></i>
+                            Embalming & Preparation Services
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success"></i>
+                            Cremation & Funeral Services
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success"></i>
+                            Memorial & Celebration Services
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success"></i>
+                            Pre-Planning Guidance
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success"></i>
+                            Grief Support & Counseling
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "base/base.html" %}
+
+{% block title %}Case Details - MemorialCare{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="page-title mb-0">
+            <i class="bi bi-briefcase"></i> Case {{ case.case_number }}
+        </h1>
+        <a href="{% url 'fhms:case_list' %}" class="btn btn-outline-secondary">Back</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Case Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Case Number</h6>
+                        <p><code>{{ case.case_number }}</code></p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Status</h6>
+                        <p>
+                            <span class="badge {% if case.status == 'pending' %}bg-warning{% elif case.status == 'in_progress' %}bg-info{% elif case.status == 'completed' %}bg-success{% else %}bg-secondary{% endif %}">
+                                {{ case.get_status_display }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Deceased</h6>
+                        <p>{{ case.deceased.full_name }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Family Surname</h6>
+                        <p>{{ case.family_surname }}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Case Director</h6>
+                        <p>{{ case.case_director|default:"-" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Assigned To</h6>
+                        <p>{{ case.assigned_to|default:"-" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if case.remarks %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Remarks</h5>
+                </div>
+                <div class="card-body">
+                    <p>{{ case.remarks }}</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0">Actions</h5>
+            </div>
+            <div class="card-body">
+                <a href="{% url 'fhms:case_update' case.id %}" class="btn btn-warning w-100 mb-2">
+                    <i class="bi bi-pencil"></i> Edit Case
+                </a>
+                <a href="{% url 'fhms:invoice_list' %}" class="btn btn-info w-100">
+                    <i class="bi bi-receipt"></i> View Invoices
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Timeline</h5>
+            </div>
+            <div class="card-body">
+                <p class="small mb-2">
+                    <strong>Created:</strong><br>
+                    {{ case.created_at|date:"M d, Y H:i" }}
+                </p>
+                <p class="small">
+                    <strong>Updated:</strong><br>
+                    {{ case.updated_at|date:"M d, Y H:i" }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

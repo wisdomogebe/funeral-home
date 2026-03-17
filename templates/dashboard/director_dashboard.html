@@ -1,0 +1,151 @@
+{% extends "base/base.html" %}
+
+{% block title %}Director Dashboard - MemorialCare{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="page-title mb-4">
+        <i class="bi bi-speedometer2"></i> Funeral Director Dashboard
+    </h1>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card">
+            <h5>My Assigned Cases</h5>
+            <div class="stat-value">{{ my_cases|length }}</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card">
+            <h5>Pending Cases</h5>
+            <div class="stat-value">{{ pending_cases|length }}</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card">
+            <h5>Today's Scheduled</h5>
+            <div class="stat-value">{{ today_scheduled|length }}</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card">
+            <h5>Total Assigned Staff</h5>
+            <div class="stat-value">{{ assigned_cases|length }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- My Cases -->
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">My Cases</h5>
+            </div>
+            <div class="card-body">
+                {% if my_cases %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Case #</th>
+                                    <th>Deceased</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for case in my_cases|slice:":5" %}
+                                    <tr>
+                                        <td>
+                                            <a href="{% url 'fhms:case_detail' case.id %}">{{ case.case_number }}</a>
+                                        </td>
+                                        <td>{{ case.deceased.full_name }}</td>
+                                        <td>
+                                            <span class="badge status-{{ case.status }}">
+                                                {{ case.get_status_display }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <a href="{% url 'fhms:case_list' %}" class="btn btn-sm btn-outline-primary w-100">
+                        View All Cases
+                    </a>
+                {% else %}
+                    <p class="text-muted">No cases assigned yet</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <a href="{% url 'fhms:case_create' %}" class="btn btn-primary btn-sm mb-2 w-100">
+                    <i class="bi bi-plus-circle"></i> Create New Case
+                </a>
+                <a href="{% url 'fhms:deceased_create' %}" class="btn btn-primary btn-sm mb-2 w-100">
+                    <i class="bi bi-plus-circle"></i> Add Deceased Record
+                </a>
+                <a href="{% url 'fhms:case_list' %}" class="btn btn-outline-primary btn-sm w-100">
+                    <i class="bi bi-list-check"></i> View All Cases
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Today's Schedule -->
+{% if today_scheduled %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Today's Scheduled</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Deceased</th>
+                                    <th>Client</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for case in today_scheduled %}
+                                    <tr>
+                                        <td>{{ case.scheduled_date|time:"H:i" }}</td>
+                                        <td>
+                                            <a href="{% url 'fhms:case_detail' case.id %}">
+                                                {{ case.deceased.full_name }}
+                                            </a>
+                                        </td>
+                                        <td>{{ case.client_family.first_name }}</td>
+                                        <td>
+                                            <span class="badge status-{{ case.status }}">
+                                                {{ case.get_status_display }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+{% endblock %}

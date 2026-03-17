@@ -1,0 +1,87 @@
+{% extends "base/base.html" %}
+
+{% block title %}Revenue by Service Report - MemorialCare{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="page-title mb-4">
+        <i class="bi bi-cash-coin"></i> Revenue by Service Report
+    </h1>
+</div>
+
+<!-- Summary -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="text-muted">Total Revenue</h6>
+                <p class="fs-4">₦{{ total_revenue }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="text-muted">Total Services</h6>
+                <p class="fs-4">{{ total_services }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="text-muted">Avg. Service Cost</h6>
+                <p class="fs-4">₦{{ avg_service_cost }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="text-muted">Top Service</h6>
+                <p class="fs-5">{{ top_service }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Service Revenue Breakdown -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Service Revenue Breakdown</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Service Type</th>
+                        <th class="text-center">Count</th>
+                        <th class="text-end">Revenue</th>
+                        <th class="text-end">Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for service in services %}
+                        <tr>
+                            <td>{{ service.name }}</td>
+                            <td class="text-center">{{ service.count }}</td>
+                            <td class="text-end">₦{{ service.revenue }}</td>
+                            <td class="text-end">{{ service.percentage }}%</td>
+                        </tr>
+                        <tr>
+                            <td colspan="4">
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-info" style="width: {{ service.percentage }}%"></div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="4" class="text-center text-muted">No service data</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

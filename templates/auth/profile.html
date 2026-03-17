@@ -1,0 +1,85 @@
+{% extends "base/base.html" %}
+
+{% block title %}My Profile - MemorialCare{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="page-title mb-4">
+        <i class="bi bi-person-circle"></i> My Profile
+    </h1>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Account Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Full Name</h6>
+                        <p>{{ user.get_full_name }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Email Address</h6>
+                        <p>{{ user.email }}</p>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Username</h6>
+                        <p>{{ user.username }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Role</h6>
+                        <p>
+                            <span class="badge bg-info">{{ user.get_role_display }}</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Account Status</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-3">
+                    <strong>Status:</strong>
+                    {% if user.is_active %}
+                        <span class="badge bg-success">Active</span>
+                    {% else %}
+                        <span class="badge bg-danger">Inactive</span>
+                    {% endif %}
+                </p>
+                <p class="small text-muted mb-2">
+                    <strong>Member Since:</strong><br>
+                    {{ user.date_joined|date:"M d, Y" }}
+                </p>
+                <p class="small text-muted">
+                    <strong>Last Login:</strong><br>
+                    {{ user.last_login|date:"M d, Y H:i"|default:"Never" }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Actions</h5>
+            </div>
+            <div class="card-body">
+                <a href="{% url 'profile_edit' %}" class="btn btn-primary w-100 mb-2">
+                    <i class="bi bi-pencil"></i> Edit Profile
+                </a>
+                <a href="{% url 'logout' %}" class="btn btn-outline-danger w-100">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

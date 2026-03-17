@@ -1,0 +1,58 @@
+{% extends "base/base.html" %}
+
+{% block title %}User Activity Report - MemorialCare{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="page-title mb-4">
+        <i class="bi bi-clock-history"></i> User Activity Report
+    </h1>
+</div>
+
+<!-- Activity Table -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Recent Activities</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Resource</th>
+                        <th>Description</th>
+                        <th>IP Address</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for activity in activities %}
+                        <tr>
+                            <td>{{ activity.user.get_full_name }}</td>
+                            <td>
+                                {% if activity.action == 'CREATE' %}
+                                    <span class="badge bg-success">CREATE</span>
+                                {% elif activity.action == 'UPDATE' %}
+                                    <span class="badge bg-info">UPDATE</span>
+                                {% elif activity.action == 'DELETE' %}
+                                    <span class="badge bg-danger">DELETE</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ activity.action }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ activity.resource_type }}</td>
+                            <td>{{ activity.description|truncatewords:10 }}</td>
+                            <td><code>{{ activity.ip_address }}</code></td>
+                            <td>{{ activity.timestamp|date:"M d, Y H:i" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="6" class="text-center text-muted">No activity found</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

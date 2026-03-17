@@ -1,0 +1,146 @@
+{% extends "base/base.html" %}
+
+{% block title %}Inventory Manager Dashboard - MemorialCare{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="page-title mb-4">
+        <i class="bi bi-box-seam"></i> Inventory Manager Dashboard
+    </h1>
+</div>
+
+<!-- Inventory Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card">
+            <h5>Total Items</h5>
+            <div class="stat-value">{{ total_items }}</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card">
+            <h5>Low Stock Items</h5>
+            <div class="stat-value">{{ low_stock_items|length }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Low Stock Items -->
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Low Stock Items</h5>
+                    <a href="{% url 'fhms:low_stock_alert' %}" class="btn btn-sm btn-outline-danger">
+                        View All
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if low_stock_items %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Code</th>
+                                    <th>Stock</th>
+                                    <th>Reorder Level</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in low_stock_items|slice:":10" %}
+                                    <tr>
+                                        <td>{{ item.name }}</td>
+                                        <td><small class="text-muted">{{ item.item_code }}</small></td>
+                                        <td>
+                                            <span class="badge bg-warning">{{ item.quantity_in_stock }}</span>
+                                        </td>
+                                        <td>{{ item.reorder_level }}</td>
+                                        <td>
+                                            <a href="{% url 'fhms:inventory_adjust' item.id %}" class="btn btn-xs btn-outline-primary">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">All items are well stocked</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <a href="{% url 'fhms:inventory_list' %}" class="btn btn-primary btn-sm mb-2 w-100">
+                    <i class="bi bi-box-seam"></i> View Inventory
+                </a>
+                <a href="{% url 'fhms:inventory_create' %}" class="btn btn-primary btn-sm mb-2 w-100">
+                    <i class="bi bi-plus-circle"></i> Add Item
+                </a>
+                <a href="{% url 'fhms:low_stock_alert' %}" class="btn btn-danger btn-sm mb-2 w-100">
+                    <i class="bi bi-exclamation-triangle"></i> Low Stock
+                </a>
+                <a href="{% url 'fhms:inventory_report' %}" class="btn btn-outline-primary btn-sm w-100">
+                    <i class="bi bi-file-earmark-chart"></i> Report
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Transactions -->
+{% if recent_transactions %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Transactions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Type</th>
+                                    <th>Quantity</th>
+                                    <th>Reason</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in recent_transactions|slice:":10" %}
+                                    <tr>
+                                        <td>{{ transaction.item.name }}</td>
+                                        <td>
+                                            <span class="badge bg-info">
+                                                {{ transaction.get_transaction_type_display }}
+                                            </span>
+                                        </td>
+                                        <td>{{ transaction.quantity }}</td>
+                                        <td>{{ transaction.reason|truncatewords:5 }}</td>
+                                        <td>{{ transaction.created_at|date:"M d, Y H:i" }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+{% endblock %}

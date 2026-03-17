@@ -1,5 +1,5 @@
 """
-Django settings for MemorialCare FHMS project.
+Django settings for MemorialCare FHMS project (Render Production-ready)
 """
 import os
 from pathlib import Path
@@ -9,13 +9,10 @@ import dj_database_url
 # Build paths inside the project
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-your-secret-key-change-in-production')
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=True, cast=bool)
-
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=lambda v: [s.strip() for s in v.split(',')])
+# SECURITY
+SECRET_KEY = config('SECRET_KEY')
+DEBUG = config('DEBUG', default=False, cast=bool)
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=lambda v: [s.strip() for s in v.split(',')])
 
 # Application definition
 INSTALLED_APPS = [
@@ -32,7 +29,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # For static files in production
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -62,10 +59,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'memorial_care.wsgi.application'
 
 # Database
-# Using SQLite for development (PostgreSQL support available when needed)
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgresql://postgres:admin@localhost:5432/memorial_care',
+        default=config('DATABASE_URL'),
         conn_max_age=600,
         conn_health_checks=True,
     )
@@ -81,14 +77,15 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Lagos'
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
+# Static files
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
 MEDIA_URL = '/media/'
@@ -101,6 +98,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'fhms.CustomUser'
 
 # Logging
+LOGS_DIR = BASE_DIR / 'logs'
+LOGS_DIR.mkdir(exist_ok=True)
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -114,7 +113,7 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs' / 'debug.log',
+            'filename': LOGS_DIR / 'debug.log',
             'formatter': 'verbose',
         },
     },
@@ -124,14 +123,30 @@ LOGGING = {
     },
 }
 
-# Create logs directory
-LOGS_DIR = BASE_DIR / 'logs'
-LOGS_DIR.mkdir(exist_ok=True)
+# Payment Gateway Settings
+PAYSTACK_PUBLIC_KEY = config('PAYSTACK_PUBLIC_KEY', default='')
+PAYSTACK_SECRET_KEY = config('PAYSTACK_SECRET_KEY', default='')
 
-# Custom settings for the application
+# Custom app settings
 MEMORIAL_CARE_SETTINGS = {
-    'FUNERAL_HOME_NAME': 'MemorialCare Funeral Home',
-    'CURRENCY': 'NGN',
-    'PAYSTACK_PUBLIC_KEY': config('PAYSTACK_PUBLIC_KEY', default=''),
-    'PAYSTACK_SECRET_KEY': config('PAYSTACK_SECRET_KEY', default=''),
+    'FUNERAL_HOME_NAME': config('FUNERAL_HOME_NAME', default='MemorialCare Funeral Home'),
+    'CURRENCY': config('CURRENCY', default='NGN'),
 }
+
+# Email (Optional)
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+
+# Security Settings for production
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_HSTS_SECONDS = 3600
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
